@@ -9,7 +9,7 @@ import UIKit
 
 class EmojiTableViewController: UITableViewController {
     
-    var object = [
+    var objects = [
         Emoji(emoji: "❤️", name: "Hearts", description: "Red hearts", isFavorite: false),
         Emoji(emoji: "💙", name: "Hearts", description: "Blue hearts", isFavorite: false),
         Emoji(emoji: "🖤", name: "Hearts", description: "Black hearts", isFavorite: false),
@@ -24,6 +24,16 @@ class EmojiTableViewController: UITableViewController {
         
     }
     
+    @IBAction func unwindSegue(segue: UIStoryboardSegue) {
+        guard segue.identifier == "saveSegue" else { return }
+        let sourceVC = segue.source as! NewEmojiTableViewController
+        let emoji = sourceVC.emoji
+        
+        let newIndexPath = IndexPath(row: objects.count, section: 0)
+        objects.append(emoji)
+        tableView.insertRows(at: [newIndexPath], with: .fade)
+    }
+    
     // MARK: - Table view data source
     
     override func numberOfSections(in tableView: UITableView) -> Int {
@@ -31,14 +41,14 @@ class EmojiTableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        return object.count
+        return objects.count
     }
     
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let cell = tableView.dequeueReusableCell(withIdentifier: "emojiCell", for: indexPath) as! EmojiTableViewCell
         
-        let object = object[indexPath.row]
+        let object = objects[indexPath.row]
         cell.set(object: object)
         
         return cell
@@ -46,7 +56,7 @@ class EmojiTableViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         if editingStyle == .delete {
-            object.remove(at: indexPath.row)
+            objects.remove(at: indexPath.row)
             tableView.deleteRows(at: [indexPath], with: .fade)
         }
     }
@@ -56,8 +66,8 @@ class EmojiTableViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, moveRowAt sourceIndexPath: IndexPath, to destinationIndexPath: IndexPath) {
-        let movedEmoji = object.remove(at: sourceIndexPath.row)
-        object.insert(movedEmoji, at: destinationIndexPath.row)
+        let movedEmoji = objects.remove(at: sourceIndexPath.row)
+        objects.insert(movedEmoji, at: destinationIndexPath.row)
         tableView.reloadData()
     }
     
@@ -71,7 +81,7 @@ class EmojiTableViewController: UITableViewController {
         let action = UIContextualAction(
             style: .destructive,
             title: "Done") { (action, view, completion) in
-            self.object.remove(at: indexPath.row)
+            self.objects.remove(at: indexPath.row)
             self.tableView.deleteRows(at: [indexPath], with: .automatic)
             completion(true)
         }
@@ -81,12 +91,12 @@ class EmojiTableViewController: UITableViewController {
     }
     
     func favoriteAction(at indexPath: IndexPath) ->UIContextualAction {
-        var object = object[indexPath.row]
+        var object = objects[indexPath.row]
         let action = UIContextualAction(
             style: .normal,
             title: "Favorite") { (action, view, completion) in
             object.isFavorite = !object.isFavorite
-            self.object[indexPath.row] = object
+            self.objects[indexPath.row] = object
             completion(true)
         }
         action.backgroundColor = object.isFavorite ? .systemPurple : .systemGray
