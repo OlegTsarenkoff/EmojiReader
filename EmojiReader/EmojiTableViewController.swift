@@ -60,4 +60,37 @@ class EmojiTableViewController: UITableViewController {
         object.insert(movedEmoji, at: destinationIndexPath.row)
         tableView.reloadData()
     }
+    
+    override func tableView(_ tableView: UITableView, leadingSwipeActionsConfigurationForRowAt indexPath: IndexPath) -> UISwipeActionsConfiguration? {
+        let done = doneAction(at: indexPath)
+        let favorite = favoriteAction(at: indexPath)
+        return UISwipeActionsConfiguration(actions: [done, favorite])
+    }
+    
+    func doneAction(at indexPath: IndexPath) -> UIContextualAction {
+        let action = UIContextualAction(
+            style: .destructive,
+            title: "Done") { (action, view, completion) in
+            self.object.remove(at: indexPath.row)
+            self.tableView.deleteRows(at: [indexPath], with: .automatic)
+            completion(true)
+        }
+        action.backgroundColor = .systemGreen
+        action.image = UIImage(systemName: "checkmark.circle")
+        return action
+    }
+    
+    func favoriteAction(at indexPath: IndexPath) ->UIContextualAction {
+        var object = object[indexPath.row]
+        let action = UIContextualAction(
+            style: .normal,
+            title: "Favorite") { (action, view, completion) in
+            object.isFavorite = !object.isFavorite
+            self.object[indexPath.row] = object
+            completion(true)
+        }
+        action.backgroundColor = object.isFavorite ? .systemPurple : .systemGray
+        action.image = UIImage(systemName: "heart")
+        return action
+    }
 }
